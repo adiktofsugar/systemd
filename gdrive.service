@@ -1,0 +1,6 @@
+[Service]
+ExecStartPre=/usr/bin/mkdir -p "%h/gdrive"
+ExecStart=/usr/bin/rclone mount gdrive: "%h/gdrive"
+
+[Install]
+WantedBy=default.target

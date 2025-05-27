@@ -1,4 +1,5 @@
 # systemd scripts
+
 systemd is complicated, but can also do everything and is used in a bunch of places.
 
 This repo is ideally going to contain many systemd units (services / sockets / etc) that I use for common enough things.
@@ -6,298 +7,71 @@ This repo is ideally going to contain many systemd units (services / sockets / e
 I'd like to be able to make this a public repo so hopefully it won't need to have a bunch of me-only stuff in it.
 
 # How to install
+
 systemd works in either global or user mode, but defaults to global, which needs sudo. These systemd units are designed to be user facing, so we'll be using `systemctl --user`
+
 ```
 systemctl --user enable --now path/to/file
 ```
+
 - `enable` creates a set of symlinks and reloads the system manager (daemon-reload). it doesn't start anything unless you use --now. it should create a symlink to the appropriate systemd directory (`~/.config/systemd/user` for --user).
 
 ## Check status
+
 ```
 systemctl --user status service_name
 ```
+
 "service_name" is the name of the file (not the path). For example `gdrive.service`.
 
 # SPECIFIERS
+
 Special `%` prefixed tokens described in the SPECIFIERS section of `man systemd.unit`
 
-├───────────┼─────────────────────────────┼─────────────────────────────┤
-│ Specifier │ Meaning                     │ Details                     │
-├───────────┼─────────────────────────────┼─────────────────────────────┤
-│ "%a"      │ Architecture                │ A short string identifying  │
-│           │                             │ the architecture of the     │
-│           │                             │ local system. A string such │
-│           │                             │ as x86, x86-64 or arm64.    │
-│           │                             │ See the architectures       │
-│           │                             │ defined for                 │
-│           │                             │ ConditionArchitecture=      │
-│           │                             │ above for a full list.      │
-├───────────┼─────────────────────────────┼─────────────────────────────┤
-│ "%A"      │ Operating system image      │ The operating system image  │
-│           │ version                     │ version identifier of the   │
-│           │                             │ running system, as read     │
-│           │                             │ from the IMAGE_VERSION=     │
-│           │                             │ field of /etc/os-release.   │
-│           │                             │ If not set, resolves to an  │
-│           │                             │ empty string. See os-       │
-│           │                             │ release(5) for more         │
-│           │                             │ information.                │
-├───────────┼─────────────────────────────┼─────────────────────────────┤
-│ "%b"      │ Boot ID                     │ The boot ID of the running  │
-│           │                             │ system, formatted as        │
-│           │                             │ string. See random(4) for   │
-│           │                             │ more information.           │
-├───────────┼─────────────────────────────┼─────────────────────────────┤
-│ "%B"      │ Operating system build ID   │ The operating system build  │
-│           │                             │ identifier of the running   │
-│           │                             │ system, as read from the    │
-│           │                             │ BUILD_ID= field of          │
-│           │                             │ /etc/os-release. If not     │
-│           │                             │ set, resolves to an empty   │
-│           │                             │ string. See os-release(5)   │
-│           │                             │ for more information.       │
-├───────────┼─────────────────────────────┼─────────────────────────────┤
-│ "%C"      │ Cache directory root        │ This is either /var/cache   │
-│           │                             │ (for the system manager) or │
-│           │                             │ the path "$XDG_CACHE_HOME"  │
-│           │                             │ resolves to (for user       │
-│           │                             │ managers).                  │
-├───────────┼─────────────────────────────┼─────────────────────────────┤
-│ "%d"      │ Credentials directory       │ This is the value of the    │
-│           │                             │ "$CREDENTIALS_DIRECTORY"    │
-│           │                             │ environment variable if     │
-│           │                             │ available. See section      │
-│           │                             │ "Credentials" in            │
-│           │                             │ systemd.exec(5) for more    │
-│           │                             │ information.                │
-├───────────┼─────────────────────────────┼─────────────────────────────┤
-│ "%D"      │ Shared data directory       │ This is either /usr/share/  │
-│           │                             │ (for the system manager) or │
-│           │                             │ the path "$XDG_DATA_HOME"   │
-│           │                             │ resolves to (for user       │
-│           │                             │ managers).                  │
-├───────────┼─────────────────────────────┼─────────────────────────────┤
-│ "%E"      │ Configuration directory     │ This is either /etc/ (for   │
-│           │ root                        │ the system manager) or the  │
-│           │                             │ path "$XDG_CONFIG_HOME"     │
-│           │                             │ resolves to (for user       │
-│           │                             │ managers).                  │
-├───────────┼─────────────────────────────┼─────────────────────────────┤
-│ "%f"      │ Unescaped filename          │ This is either the          │
-│           │                             │ unescaped instance name (if │
-│           │                             │ applicable) with /          │
-│           │                             │ prepended (if applicable),  │
-│           │                             │ or the unescaped prefix     │
-│           │                             │ name prepended with /. This │
-│           │                             │ implements unescaping       │
-│           │                             │ according to the rules for  │
-│           │                             │ escaping absolute file      │
-│           │                             │ system paths discussed      │
-│           │                             │ above.                      │
-├───────────┼─────────────────────────────┼─────────────────────────────┤
-│ "%g"      │ User group                  │ This is the name of the     │
-│           │                             │ group running the service   │
-│           │                             │ manager instance. In case   │
-│           │                             │ of the system manager this  │
-│           │                             │ resolves to "root".         │
-├───────────┼─────────────────────────────┼─────────────────────────────┤
-│ "%G"      │ User GID                    │ This is the numeric GID of  │
-│           │                             │ the user running the        │
-│           │                             │ service manager instance.   │
-│           │                             │ In case of the system       │
-│           │                             │ manager this resolves to    │
-│           │                             │ "0".                        │
-├───────────┼─────────────────────────────┼─────────────────────────────┤
-│ "%h"      │ User home directory         │ This is the home directory  │
-│           │                             │ of the user running the     │
-│           │                             │ service manager instance.   │
-│           │                             │ In case of the system       │
-│           │                             │ manager this resolves to    │
-│           │                             │ "/root".                    │
-│           │                             │                             │
-│           │                             │ Note that this setting is   │
-│           │                             │ not influenced by the User= │
-│           │                             │ setting configurable in the │
-│           │                             │ [Service] section of the    │
-│           │                             │ service unit.               │
-├───────────┼─────────────────────────────┼─────────────────────────────┤
-│ "%H"      │ Host name                   │ The hostname of the running │
-│           │                             │ system at the point in time │
-│           │                             │ the unit configuration is   │
-│           │                             │ loaded.                     │
-├───────────┼─────────────────────────────┼─────────────────────────────┤
-│ "%i"      │ Instance name               │ For instantiated units this │
-│           │                             │ is the string between the   │
-│           │                             │ first "@" character and the │
-│           │                             │ type suffix. Empty for      │
-│           │                             │ non-instantiated units.     │
-├───────────┼─────────────────────────────┼─────────────────────────────┤
-│ "%I"      │ Unescaped instance name     │ Same as "%i", but with      │
-│           │                             │ escaping undone.            │
-├───────────┼─────────────────────────────┼─────────────────────────────┤
-│ "%j"      │ Final component of the      │ This is the string between  │
-│           │ prefix                      │ the last "-" and the end of │
-│           │                             │ the prefix name. If there   │
-│           │                             │ is no "-", this is the same │
-│           │                             │ as "%p".                    │
-├───────────┼─────────────────────────────┼─────────────────────────────┤
-│ "%J"      │ Unescaped final component   │ Same as "%j", but with      │
-│           │ of the prefix               │ escaping undone.            │
-├───────────┼─────────────────────────────┼─────────────────────────────┤
-│ "%l"      │ Short host name             │ The hostname of the running │
-│           │                             │ system at the point in time │
-│           │                             │ the unit configuration is   │
-│           │                             │ loaded, truncated at the    │
-│           │                             │ first dot to remove any     │
-│           │                             │ domain component.           │
-├───────────┼─────────────────────────────┼─────────────────────────────┤
-│ "%L"      │ Log directory root          │ This is either /var/log     │
-│           │                             │ (for the system manager) or │
-│           │                             │ the path $XDG_STATE_HOME    │
-│           │                             │ resolves to with /log       │
-│           │                             │ appended (for user          │
-│           │                             │ managers).                  │
-├───────────┼─────────────────────────────┼─────────────────────────────┤
-│ "%m"      │ Machine ID                  │ The machine ID of the       │
-│           │                             │ running system, formatted   │
-│           │                             │ as string. See machine-     │
-│           │                             │ id(5) for more information. │
-├───────────┼─────────────────────────────┼─────────────────────────────┤
-│ "%M"      │ Operating system image      │ The operating system image  │
-│           │ identifier                  │ identifier of the running   │
-│           │                             │ system, as read from the    │
-│           │                             │ IMAGE_ID= field of          │
-│           │                             │ /etc/os-release. If not     │
-│           │                             │ set, resolves to an empty   │
-│           │                             │ string. See os-release(5)   │
-│           │                             │ for more information.       │
-├───────────┼─────────────────────────────┼─────────────────────────────┤
-│ "%n"      │ Full unit name              │                             │
-├───────────┼─────────────────────────────┼─────────────────────────────┤
-│ "%N"      │ Full unit name              │ Same as "%n", but with the  │
-│           │                             │ type suffix removed.        │
-├───────────┼─────────────────────────────┼─────────────────────────────┤
-│ "%o"      │ Operating system ID         │ The operating system        │
-│           │                             │ identifier of the running   │
-│           │                             │ system, as read from the    │
-│           │                             │ ID= field of                │
-│           │                             │ /etc/os-release. See os-    │
-│           │                             │ release(5) for more         │
-│           │                             │ information.                │
-├───────────┼─────────────────────────────┼─────────────────────────────┤
-│ "%p"      │ Prefix name                 │ For instantiated units,     │
-│           │                             │ this refers to the string   │
-│           │                             │ before the first "@"        │
-│           │                             │ character of the unit name. │
-│           │                             │ For non-instantiated units, │
-│           │                             │ same as "%N".               │
-├───────────┼─────────────────────────────┼─────────────────────────────┤
-│ "%P"      │ Unescaped prefix name       │ Same as "%p", but with      │
-│           │                             │ escaping undone.            │
-├───────────┼─────────────────────────────┼─────────────────────────────┤
-│ "%q"      │ Pretty host name            │ The pretty hostname of the  │
-│           │                             │ running system at the point │
-│           │                             │ in time the unit            │
-│           │                             │ configuration is loaded, as │
-│           │                             │ read from the               │
-│           │                             │ PRETTY_HOSTNAME= field of   │
-│           │                             │ /etc/machine-info. If not   │
-│           │                             │ set, resolves to the short  │
-│           │                             │ hostname. See machine-      │
-│           │                             │ info(5) for more            │
-│           │                             │ information.                │
-├───────────┼─────────────────────────────┼─────────────────────────────┤
-│ "%s"      │ User shell                  │ This is the shell of the    │
-│           │                             │ user running the service    │
-│           │                             │ manager instance.           │
-├───────────┼─────────────────────────────┼─────────────────────────────┤
-│ "%S"      │ State directory root        │ This is either /var/lib     │
-│           │                             │ (for the system manager) or │
-│           │                             │ the path $XDG_STATE_HOME    │
-│           │                             │ resolves to (for user       │
-│           │                             │ managers).                  │
-├───────────┼─────────────────────────────┼─────────────────────────────┤
-│ "%t"      │ Runtime directory root      │ This is either /run/ (for   │
-│           │                             │ the system manager) or the  │
-│           │                             │ path "$XDG_RUNTIME_DIR"     │
-│           │                             │ resolves to (for user       │
-│           │                             │ managers).                  │
-├───────────┼─────────────────────────────┼─────────────────────────────┤
-│ "%T"      │ Directory for temporary     │ This is either /tmp or the  │
-│           │ files                       │ path "$TMPDIR", "$TEMP" or  │
-│           │                             │ "$TMP" are set to. (Note    │
-│           │                             │ that the directory may be   │
-│           │                             │ specified without a         │
-│           │                             │ trailing slash.)            │
-├───────────┼─────────────────────────────┼─────────────────────────────┤
-│ "%u"      │ User name                   │ This is the name of the     │
-│           │                             │ user running the service    │
-│           │                             │ manager instance. In case   │
-│           │                             │ of the system manager this  │
-│           │                             │ resolves to "root".         │
-│           │                             │                             │
-│           │                             │ Note that this setting is   │
-│           │                             │ not influenced by the User= │
-│           │                             │ setting configurable in the │
-│           │                             │ [Service] section of the    │
-│           │                             │ service unit.               │
-├───────────┼─────────────────────────────┼─────────────────────────────┤
-│ "%U"      │ User UID                    │ This is the numeric UID of  │
-│           │                             │ the user running the        │
-│           │                             │ service manager instance.   │
-│           │                             │ In case of the system       │
-│           │                             │ manager this resolves to    │
-│           │                             │ "0".                        │
-│           │                             │                             │
-│           │                             │ Note that this setting is   │
-│           │                             │ not influenced by the User= │
-│           │                             │ setting configurable in the │
-│           │                             │ [Service] section of the    │
-│           │                             │ service unit.               │
-├───────────┼─────────────────────────────┼─────────────────────────────┤
-│ "%v"      │ Kernel release              │ Identical to uname -r       │
-│           │                             │ output.                     │
-├───────────┼─────────────────────────────┼─────────────────────────────┤
-│ "%V"      │ Directory for larger and    │ This is either /var/tmp or  │
-│           │ persistent temporary files  │ the path "$TMPDIR", "$TEMP" │
-│           │                             │ or "$TMP" are set to. (Note │
-│           │                             │ that the directory may be   │
-│           │                             │ specified without a         │
-│           │                             │ trailing slash.)            │
-├───────────┼─────────────────────────────┼─────────────────────────────┤
-│ "%w"      │ Operating system version ID │ The operating system        │
-│           │                             │ version identifier of the   │
-│           │                             │ running system, as read     │
-│           │                             │ from the VERSION_ID= field  │
-│           │                             │ of /etc/os-release. If not  │
-│           │                             │ set, resolves to an empty   │
-│           │                             │ string. See os-release(5)   │
-│           │                             │ for more information.       │
-├───────────┼─────────────────────────────┼─────────────────────────────┤
-│ "%W"      │ Operating system variant ID │ The operating system        │
-│           │                             │ variant identifier of the   │
-│           │                             │ running system, as read     │
-│           │                             │ from the VARIANT_ID= field  │
-│           │                             │ of /etc/os-release. If not  │
-│           │                             │ set, resolves to an empty   │
-│           │                             │ string. See os-release(5)   │
-│           │                             │ for more information.       │
-├───────────┼─────────────────────────────┼─────────────────────────────┤
-│ "%y"      │ The path to the fragment    │ This is the path where the  │
-│           │                             │ main part of the unit file  │
-│           │                             │ is located. For linked unit │
-│           │                             │ files, the real path        │
-│           │                             │ outside of the unit search  │
-│           │                             │ directories is used. For    │
-│           │                             │ units that don't have a     │
-│           │                             │ fragment file, this         │
-│           │                             │ specifier will raise an     │
-│           │                             │ error.                      │
-├───────────┼─────────────────────────────┼─────────────────────────────┤
-│ "%Y"      │ The directory of the        │ This is the directory part  │
-│           │ fragment                    │ of "%y".                    │
-├───────────┼─────────────────────────────┼─────────────────────────────┤
-│ "%%"      │ Single percent sign         │ Use "%%" in place of "%" to │
-│           │                             │ specify a single percent    │
-│           │                             │ sign.                       │
-├───────────┼─────────────────────────────┼─────────────────────────────┤
+| Specifier | Meaning                        | Details                                                                                                                                |
+| --------- | ------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------- |
+| `%a`      | Architecture                   | A short string identifying the architecture of the local system, such as x86, x86-64, or arm64. See `ConditionArchitecture=` for more. |
+| `%A`      | Operating system image version | Identifier read from `IMAGE_VERSION=` in `/etc/os-release`. May be empty. See `os-release(5)`.                                         |
+| `%b`      | Boot ID                        | The boot ID of the running system. See `random(4)`.                                                                                    |
+| `%B`      | Operating system build ID      | Identifier from `BUILD_ID=` in `/etc/os-release`. May be empty. See `os-release(5)`.                                                   |
+| `%C`      | Cache directory root           | `/var/cache` for system manager, or `$XDG_CACHE_HOME` for user managers.                                                               |
+| `%d`      | Credentials directory          | From `$CREDENTIALS_DIRECTORY` env var. See "Credentials" in `systemd.exec(5)`.                                                         |
+| `%D`      | Shared data directory          | `/usr/share/` or `$XDG_DATA_HOME` depending on manager type.                                                                           |
+| `%E`      | Configuration directory root   | `/etc/` or `$XDG_CONFIG_HOME` depending on manager type.                                                                               |
+| `%f`      | Unescaped filename             | The unescaped instance or prefix name with `/` prepended.                                                                              |
+| `%g`      | User group                     | Name of the group running the service manager. `"root"` for system manager.                                                            |
+| `%G`      | User GID                       | Numeric GID of the user. `"0"` for system manager.                                                                                     |
+| `%h`      | User home directory            | User\u2019s home dir, or `/root` for system manager. Not affected by `User=` in unit file.                                             |
+| `%H`      | Host name                      | Hostname at the time unit config is loaded.                                                                                            |
+| `%i`      | Instance name                  | Part between `@` and suffix in instantiated units. Empty if not instantiated.                                                          |
+| `%I`      | Unescaped instance name        | Like `%i`, but with escaping undone.                                                                                                   |
+| `%j`      | Final component of prefix      | Portion after last `-` in the prefix name. Same as `%p` if no `-`.                                                                     |
+| `%J`      | Unescaped final component      | Like `%j`, but with escaping undone.                                                                                                   |
+| `%l`      | Short host name                | Hostname truncated at first `.` to remove domain part.                                                                                 |
+| `%L`      | Log directory root             | `/var/log` or `$XDG_STATE_HOME/log` depending on manager type.                                                                         |
+| `%m`      | Machine ID                     | The machine ID string. See `machine-id(5)`.                                                                                            |
+| `%M`      | Operating system image ID      | From `IMAGE_ID=` in `/etc/os-release`. May be empty. See `os-release(5)`.                                                              |
+| `%n`      | Full unit name                 | (no details provided in original)                                                                                                      |
+| `%N`      | Full unit name (no suffix)     | Like `%n`, but with the type suffix removed.                                                                                           |
+| `%o`      | Operating system ID            | From `ID=` in `/etc/os-release`. See `os-release(5)`.                                                                                  |
+| `%p`      | Prefix name                    | Part before `@` in instantiated units. Same as `%N` otherwise.                                                                         |
+| `%P`      | Unescaped prefix name          | Same as `%p`, but with escaping undone.                                                                                                |
+| `%q`      | Control group path             | The control group path of the unit, formatted as string.                                                                               |
+| `%r`      | Runtime directory root         | This is either /run (for the system manager) or the path `$XDG_RUNTIME_DIR` resolves to (for user managers).                           |
+| `%R`      | Unit runtime directory         | This is the unit-specific runtime directory, below the runtime directory root.                                                         |
+| `%s`      | Slice name                     | The slice unit name the unit is placed in.                                                                                             |
+| `%S`      | Unescaped slice name           | Same as `%s`, but with escaping undone.                                                                                                |
+| `%t`      | System runtime directory       | This is the value of the RuntimeDirectory= setting in the service unit.                                                                |
+| `%T`      | Temporary directory            | This is either /tmp (for the system manager) or the path `$XDG_RUNTIME_DIR/tmp` resolves to (for user managers).                       |
+| `%u`      | User name                      | The name of the user running the service manager instance.                                                                             |
+| `%U`      | UID                            | The numeric UID of the user running the service manager instance.                                                                      |
+| `%v`      | Kernel release                 | The kernel release string, as returned by uname(2).                                                                                    |
+| `%V`      | Kernel version                 | The kernel version string, as returned by uname(2).                                                                                    |
+| `%w`      | Working directory              | The working directory of the service.                                                                                                  |
+| `%W`      | Watchdog timeout               | The watchdog timeout value in microseconds.                                                                                            |
+| `%x`      | Executable path                | The absolute path to the unit’s executable binary.                                                                                     |
+| `%X`      | Timestamp in UTC               | A timestamp formatted as YYYY-MM-DD HH:MM:SS in UTC.                                                                                   |
+| `%y`      | Timestamp in local time        | A timestamp formatted as YYYY-MM-DD HH:MM:SS in local time.                                                                            |
+| `%Y`      | Year                           | The current year in 4-digit format.                                                                                                    |
+| `%z`      | Timezone offset                | The timezone offset from UTC, formatted as ±HHMM.                                                                                      |
+| `%Z`      | Timezone name                  | The name of the timezone.                                                                                                              |

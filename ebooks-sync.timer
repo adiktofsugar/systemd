@@ -1,0 +1,6 @@
+[Timer]
+OnBootSec=1 sec
+OnActiveSec=5 min
+
+[Install]
+WantedBy=default.target

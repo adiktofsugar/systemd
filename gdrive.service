@@ -1,3 +1,6 @@
+[Unit]
+Description=Mount google drive at ~/gdrive
+
 [Service]
 ExecStartPre=/usr/bin/mkdir -p "%h/gdrive"
 ExecStart=/usr/bin/rclone mount gdrive: "%h/gdrive"

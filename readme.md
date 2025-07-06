@@ -75,3 +75,18 @@ Special `%` prefixed tokens described in the SPECIFIERS section of `man systemd.
 | `%Y`      | Year                           | The current year in 4-digit format.                                                                                                    |
 | `%z`      | Timezone offset                | The timezone offset from UTC, formatted as ±HHMM.                                                                                      |
 | `%Z`      | Timezone name                  | The name of the timezone.                                                                                                              |
+
+# Timers and services
+Timers by default start a service of the same name, so foo.timer is related to foo.service. This can replace cron. When setting up a system like this, you normally set the service to a oneshot service and make sure the timer is installed (at default.target or some multi-user.target or something).
+
+## Time units
+
+- usec, us, μs
+- msec, ms
+- seconds, second, sec, s
+- minutes, minute, min, m
+- hours, hour, hr, h
+- days, day, d
+- weeks, week, w
+- months, month, M (defined as 30.44 days)
+- years, year, y (defined as 365.25 days)

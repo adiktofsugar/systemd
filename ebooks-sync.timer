@@ -1,6 +1,11 @@
 [Timer]
-OnBootSec=1 sec
-OnActiveSec=5 min
+# using onStartup vs onBoot since this is designed to be run in a user context
+#  and onStartup is relative to when the system service starts for the user, at login
+OnStartupSec=1 sec
+# onActive will never run because the timer is always active.
+OnUnitActiveSec=1 min
+# Persistent=false will uninstall the time after it's run. This seems like a weird default but :shrug:
+Persistent=true
 
 [Install]
-WantedBy=default.target
+WantedBy=timers.target

@@ -4,4 +4,4 @@ Description=Sync google drive ebooks to ~/ebooks folder
 [Service]
 Type=oneshot
 ExecStartPre=/usr/bin/mkdir -p "%h/ebooks"
-ExecStart=/usr/bin/rclone sync gdrive:ebooks "%h/ebooks"
+ExecStart=/usr/bin/rclone -v sync gdrive:ebooks "%h/ebooks"

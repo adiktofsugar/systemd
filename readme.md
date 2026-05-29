@@ -10,8 +10,9 @@ I'd like to be able to make this a public repo so hopefully it won't need to hav
 
 systemd works in either global or user mode, but defaults to global, which needs sudo. These systemd units are designed to be user facing, so we'll be using `systemctl --user`
 
-```
-systemctl --user enable --now path/to/file
+```bash
+# needs to be absolute path
+systemctl --user enable --now /path/to/file
 ```
 
 - `enable` creates a set of symlinks and reloads the system manager (daemon-reload). it doesn't start anything unless you use --now. it should create a symlink to the appropriate systemd directory (`~/.config/systemd/user` for --user).
